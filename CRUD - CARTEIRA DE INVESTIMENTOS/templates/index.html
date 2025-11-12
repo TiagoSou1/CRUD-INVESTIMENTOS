@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Investimentos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            border: 2px solid #ffffff;
+            padding: 30px;
+            margin-bottom: 30px;
+            background: #111111;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #cccccc;
+            letter-spacing: 2px;
+        }
+
+        .section {
+            background: #111111;
+            border: 2px solid #ffffff;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            border-bottom: 2px solid #ffffff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            letter-spacing: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #000000;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            font-size: 1em;
+            font-family: 'Courier New', monospace;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            background: #222222;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .btn {
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #ffffff;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+        }
+
+        .btn-danger:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #000000;
+        }
+
+        table th {
+            background: #ffffff;
+            color: #000000;
+            padding: 12px;
+            text-align: left;
+            border: 2px solid #ffffff;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        table td {
+            padding: 12px;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+        }
+
+        table tr:hover {
+            background: #222222;
+        }
+
+        .alert {
+            padding: 15px;
+            border: 2px solid #ffffff;
+            margin-bottom: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .alert-success {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .alert-error {
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #ff0000;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #ffffff;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #111111;
+            border: 2px solid #ffffff;
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .stat-card h3 {
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        #mensagem {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1> SISTEMA DE INVESTIMENTOS</h1>
+            <p>GESTÃO DE CARTEIRA PROFISSIONAL</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>PATRIMÔNIO TOTAL</h3>
+                <div class="stat-value" id="patrimonioTotal">R$ 0,00</div>
+            </div>
+            <div class="stat-card">
+                <h3>TOTAL DE ATIVOS</h3>
+                <div class="stat-value" id="totalAtivos">0</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2> ADICIONAR INVESTIMENTO</h2>
+            <form id="formInvestimento" class="grid">
+                <div class="form-group">
+                    <label>CÓDIGO DO ATIVO:</label>
+                    <input type="text" id="inv_codigo" placeholder="Ex: PETR4, ITUB4" required>
+                </div>
+                <div class="form-group">
+                    <label>TIPO:</label>
+                    <select id="inv_tipo" required>
+                        <option value="">Selecione...</option>
+                        <option value="Acao">AÇÃO</option>
+                        <option value="FII">FII</option>
+                        <option value="Cripto">CRIPTO</option>
+                        <option value="Renda Fixa">RENDA FIXA</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>QUANTIDADE:</label>
+                    <input type="number" id="inv_quantidade" required>
+                </div>
+                <div class="form-group">
+                    <label>PREÇO MÉDIO:</label>
+                    <input type="number" step="0.01" id="inv_preco" required>
+                </div>
+                <div class="form-group">
+                    <label>DATA DA COMPRA:</label>
+                    <input type="date" id="inv_data" required>
+                </div>
+                <div class="form-group">
+                    <label>CORRETORA:</label>
+                    <select id="inv_corretora" required></select>
+                </div>
+            </form>
+            <button class="btn" onclick="inserirInvestimento()">ADICIONAR INVESTIMENTO</button>
+        </div>
+
+        <div class="section">
+            <h2> RECURSOS ESPECIAIS</h2>
+            <button class="btn" onclick="atualizarPatrimonio()"> ATUALIZAR PATRIMÔNIO (FUNCTION)</button>
+            <button class="btn" onclick="valorizarAtivos()"> VALORIZAR ATIVOS +5% (PROCEDURE)</button>
+        </div>
+
+        <div class="section">
+            <h2> CARTEIRA DE INVESTIMENTOS</h2>
+            <button class="btn" onclick="carregarInvestimentos()"> ATUALIZAR LISTA</button>
+            <div id="tabelaInvestimentos"></div>
+        </div>
+
+        <div class="section">
+            <h2> RELATÓRIOS</h2>
+            <div class="form-group">
+                <label>INVESTIMENTOS POR CORRETORA:</label>
+                <select id="corretora_relatorio"></select>
+                <button class="btn" onclick="relatorioPorCorretora()">GERAR RELATÓRIO</button>
+            </div>
+            <div id="resultadoRelatorio"></div>
+        </div>
+
+        <div id="mensagem"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        function mostrarMensagem(texto, tipo) {
+            const div = document.getElementById('mensagem');
+            div.innerHTML = `<div class="alert alert-${tipo}">${texto}</div>`;
+            setTimeout(() => div.innerHTML = '', 3000);
+        }
+
+        async function carregarCorretoras() {
+            try {
+                const response = await fetch(`${API_URL}/corretoras`);
+                const corretoras = await response.json();
+                
+                const selects = ['inv_corretora', 'corretora_relatorio'];
+                selects.forEach(id => {
+                    const select = document.getElementById(id);
+                    select.innerHTML = '<option value="">SELECIONE...</option>';
+                    corretoras.forEach(corr => {
+                        select.innerHTML += `<option value="${corr.id}">${corr.nome} - TAXA: R$ ${corr.taxa.toFixed(2)}</option>`;
+                    });
+                });
+            } catch (error) {
+                mostrarMensagem('ERRO AO CARREGAR CORRETORAS', 'error');
+            }
+        }
+
+        async function inserirInvestimento() {
+            const dados = {
+                codigo: document.getElementById('inv_codigo').value.toUpperCase(),
+                tipo: document.getElementById('inv_tipo').value,
+                quantidade: document.getElementById('inv_quantidade').value,
+                preco_medio: document.getElementById('inv_preco').value,
+                data_compra: document.getElementById('inv_data').value,
+                corretora_id: document.getElementById('inv_corretora').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/investimentos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+
+                if (response.ok) {
+                    mostrarMensagem('INVESTIMENTO ADICIONADO COM SUCESSO!', 'success');
+                    document.getElementById('formInvestimento').reset();
+                    carregarInvestimentos();
+                    atualizarPatrimonio();
+                } else {
+                    mostrarMensagem('ERRO AO ADICIONAR INVESTIMENTO', 'error');
+                }
+            } catch (error) {
+                mostrarMensagem('ERRO NA CONEXÃO', 'error');
+            }
+        }
+
+        async function carregarInvestimentos() {
+            document.getElementById('tabelaInvestimentos').innerHTML = '<div class="loading">CARREGANDO...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/investimentos`);
+                const investimentos = await response.json();
+
+                document.getElementById('totalAtivos').textContent = investimentos.length;
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>CÓDIGO</th>
+                                <th>TIPO</th>
+                                <th>QTD</th>
+                                <th>PREÇO MÉDIO</th>
+                                <th>VALOR TOTAL</th>
+                                <th>DATA COMPRA</th>
+                                <th>CORRETORA</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                investimentos.forEach(inv => {
+                    const valorTotal = inv.quantidade * inv.preco_medio;
+                    html += `
+                        <tr>
+                            <td>${inv.id}</td>
+                            <td>${inv.codigo}</td>
+                            <td>${inv.tipo}</td>
+                            <td>${inv.quantidade}</td>
+                            <td>R$ ${inv.preco_medio.toFixed(2)}</td>
+                            <td>R$ ${valorTotal.toFixed(2)}</td>
+                            <td>${inv.data_compra}</td>
+                            <td>${inv.corretora}</td>
+                            <td class="actions">
+                                <button class="btn btn-danger" onclick="excluirInvestimento(${inv.id})">EXCLUIR</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('tabelaInvestimentos').innerHTML = html;
+            } catch (error) {
+                mostrarMensagem('ERRO AO CARREGAR INVESTIMENTOS', 'error');
+            }
+        }
+
+        async function excluirInvestimento(id) {
+            if (!confirm('CONFIRMA A EXCLUSÃO?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/investimentos/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    mostrarMensagem('INVESTIMENTO EXCLUÍDO!', 'success');
+                    carregarInvestimentos();
+                    atualizarPatrimonio();
+                }
+            } catch (error) {
+                mostrarMensagem('ERRO AO EXCLUIR', 'error');
+            }
+        }
+
+        async function atualizarPatrimonio() {
+            try {
+                const response = await fetch(`${API_URL}/patrimonio-total`);
+                const data = await response.json();
+                document.getElementById('patrimonioTotal').textContent = `R$ ${data.total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            } catch (error) {
+                mostrarMensagem('ERRO AO CALCULAR PATRIMÔNIO', 'error');
+            }
+        }
+
+        async function valorizarAtivos() {
+            if (!confirm('APLICAR 5% DE VALORIZAÇÃO EM TODOS OS ATIVOS?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/valorizar-ativos`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    mostrarMensagem(' VALORIZAÇÃO DE 5% APLICADA COM SUCESSO!', 'success');
+                    carregarInvestimentos();
+                    atualizarPatrimonio();
+                }
+            } catch (error) {
+                mostrarMensagem('ERRO AO APLICAR VALORIZAÇÃO', 'error');
+            }
+        }
+
+        async function relatorioPorCorretora() {
+            const corretoraId = document.getElementById('corretora_relatorio').value;
+            if (!corretoraId) {
+                mostrarMensagem('SELECIONE UMA CORRETORA', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/investimentos/corretora/${corretoraId}`);
+                const investimentos = await response.json();
+
+                let html = `
+                    <h3>RESULTADO DO RELATÓRIO</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CÓDIGO</th>
+                                <th>TIPO</th>
+                                <th>QUANTIDADE</th>
+                                <th>PREÇO MÉDIO</th>
+                                <th>VALOR TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                investimentos.forEach(inv => {
+                    const valorTotal = inv.quantidade * inv.preco_medio;
+                    html += `
+                        <tr>
+                            <td>${inv.codigo}</td>
+                            <td>${inv.tipo}</td>
+                            <td>${inv.quantidade}</td>
+                            <td>R$ ${inv.preco_medio.toFixed(2)}</td>
+                            <td>R$ ${valorTotal.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('resultadoRelatorio').innerHTML = html;
+            } catch (error) {
+                mostrarMensagem('ERRO AO GERAR RELATÓRIO', 'error');
+            }
+        }
+
+        window.onload = function() {
+            carregarCorretoras();
+            carregarInvestimentos();
+            atualizarPatrimonio();
+        };
+    </script>
+</body>
+</html>
