@@ -1,4 +1,4 @@
-A#  CRUD - Sistema de Carteira de Investimentos
+#  CRUD - Sistema de Carteira de Investimentos
 
 Um sistema completo de **gestão de investimentos**, com **Flask (Python)** no back-end e **HTML + CSS + JavaScript** no front-end.  
 Permite cadastrar, listar, excluir e valorizar ativos financeiros, além de gerar relatórios por corretora e calcular o patrimônio total.
