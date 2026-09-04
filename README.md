@@ -1,139 +1,123 @@
-#  CRUD - Sistema de Carteira de Investimentos
+# Investment Portfolio CRUD
 
-Um sistema completo de **gestão de investimentos**, com **Flask (Python)** no back-end e **HTML + CSS + JavaScript** no front-end.  
-Permite cadastrar, listar, excluir e valorizar ativos financeiros, além de gerar relatórios por corretora e calcular o patrimônio total.
+A full-stack academic project for managing a small investment portfolio. A Flask API exposes Oracle database operations, while a responsive HTML/CSS/JavaScript interface handles registration, listing, deletion, broker reports, and portfolio totals.
 
----
+## What it demonstrates
 
-##  Tecnologias Utilizadas
+- REST-style endpoints with Flask
+- Parameterized Oracle SQL queries
+- Relational modeling with foreign keys and sequences
+- Database triggers, a stored function, and a stored procedure
+- Browser-side API consumption with JavaScript
+- Environment-based configuration with no credentials committed to source control
 
-### Backend
-- **Python 3.x**
-- **Flask** — Framework web
-- **Flask-CORS** — Para comunicação com o front-end
-- **oracledb** — Conexão com banco de dados Oracle
-- **Oracle SQL Developer / XE** — Banco de dados
+## Features
 
-### Frontend
-- **HTML5 / CSS3 / JavaScript**
-- Layout em estilo **terminal dark minimalista**
-- Consumo de API com `fetch()`
+- Register and list investments
+- Delete an investment by identifier
+- List configured brokers
+- Filter investments by broker
+- Calculate total portfolio value with `fn_patrimonio_total`
+- Apply a 5% demonstration adjustment with `sp_valorizar_ativos`
+- Check application configuration through `/api/health`
 
----
+This is a learning project. It does not retrieve market prices, provide investment advice, or represent a production trading system.
 
-##  Funcionalidades
+## Architecture
 
- **CRUD completo de investimentos**
-- Inserir novos ativos (ações, FIIs, cripto, renda fixa)
-- Listar todos os investimentos com valores totais
-- Excluir ativos individuais
-
- **Integração com banco Oracle**
-- Tabelas: `Investimentos` e `Corretoras`
-- Sequence: `seq_investimento`
-- Function: `fn_patrimonio_total`
-- Procedure: `sp_valorizar_ativos`
-
- **Relatórios e operações especiais**
-- Relatório de investimentos por corretora
-- Valorização automática de 5% (Procedure)
-- Cálculo do patrimônio total (Function)
-
- **Interface moderna**
-- Visual retrô em preto e branco
-- Total de ativos e patrimônio exibidos no topo
-- Mensagens de sucesso/erro animadas
-
----
-
-##  Estrutura do Projeto
-
+```text
+Browser interface
+      │ fetch / JSON
+      ▼
+Flask API (`app.py`)
+      │ python-oracledb
+      ▼
+Oracle Database
 ```
-CRUD - CARTEIRA DE INVESTIMENTOS/
-│
-├── app.py                 # Aplicação Flask (backend)
+
+## Project structure
+
+```text
+CRUD-INVESTIMENTOS/
+├── SQL/
+│   ├── create.sql
+│   └── inserts_exemplo.sql
 ├── templates/
-│   └── index.html         # Interface principal (frontend)
-├── static/
-│   └── (opcional para CSS/JS futuros)
-└── README.md              # Este arquivo
+│   └── index.html
+├── .env.example
+├── .gitignore
+├── app.py
+├── README.md
+└── requirements.txt
 ```
 
----
+## Run locally
 
-##  Configuração e Execução
+Requirements:
 
-### 1️ Instale as dependências:
+- Python 3.10+
+- Oracle Database XE or another reachable Oracle instance
+- Oracle credentials with permission to create and use the project objects
+
+Create a virtual environment and install dependencies:
+
 ```bash
-pip install flask flask-cors oracledb
+python -m venv .venv
+python -m pip install -r requirements.txt
 ```
 
-### 2️ Configure a conexão com o Oracle:
-No arquivo `app.py`, edite a função `conectar_bd()`:
-```python
-connection = oracledb.connect(
-    user="SEU_USUARIO",
-    password="SUA_SENHA",
-    dsn="localhost:1521/xe"
-)
+Copy `.env.example` values into your shell environment. The application reads the variables directly; it does not load `.env` automatically.
+
+PowerShell example:
+
+```powershell
+$env:ORACLE_USER = "your_user"
+$env:ORACLE_PASSWORD = "your_password"
+$env:ORACLE_DSN = "localhost:1521/XEPDB1"
 ```
 
-### 3️ Estrutura esperada no banco:
+Create the schema, then seed the illustrative records:
 
-```sql
-CREATE TABLE Corretoras (
-  corretora_id NUMBER PRIMARY KEY,
-  corretora_nome VARCHAR2(100),
-  corretora_taxa_corretagem NUMBER
-);
-
-CREATE TABLE Investimentos (
-  investimento_id NUMBER PRIMARY KEY,
-  corretora_id NUMBER REFERENCES Corretoras(corretora_id),
-  investimento_codigo VARCHAR2(20),
-  investimento_tipo VARCHAR2(50),
-  investimento_quantidade NUMBER,
-  investimento_preco_medio NUMBER,
-  investimento_data_compra DATE
-);
-
-CREATE SEQUENCE seq_investimento START WITH 1 INCREMENT BY 1;
-
-CREATE OR REPLACE FUNCTION fn_patrimonio_total RETURN NUMBER IS
-  total NUMBER;
-BEGIN
-  SELECT SUM(investimento_quantidade * investimento_preco_medio)
-  INTO total FROM Investimentos;
-  RETURN NVL(total, 0);
-END;
-/
-
-CREATE OR REPLACE PROCEDURE sp_valorizar_ativos IS
-BEGIN
-  UPDATE Investimentos
-  SET investimento_preco_medio = investimento_preco_medio * 1.05;
-  COMMIT;
-END;
-/
+```text
+SQL/create.sql
+SQL/inserts_exemplo.sql
 ```
 
-### 4️ Execute o servidor:
+Start the server:
+
 ```bash
 python app.py
 ```
 
-Acesse no navegador:
-```
-http://127.0.0.1:5000
-```
+Open `http://127.0.0.1:5000`.
 
----
+## API overview
 
+| Method | Route | Purpose |
+|---|---|---|
+| `GET` | `/api/health` | Check application and configuration status |
+| `GET` | `/api/investimentos` | List investments |
+| `POST` | `/api/investimentos` | Create an investment |
+| `DELETE` | `/api/investimentos/{id}` | Delete an investment |
+| `GET` | `/api/corretoras` | List brokers |
+| `GET` | `/api/investimentos/corretora/{id}` | Filter by broker |
+| `GET` | `/api/patrimonio-total` | Calculate total portfolio value |
+| `POST` | `/api/valorizar-ativos` | Apply the demonstration procedure |
 
-## 👨‍💻 Autor
+## Security and production gaps
 
-**Thiago Sousa Leite**  
- Projeto desenvolvido para fins de * aprendizado em Python  + Banco de Dados(SQL)**  
- Contato: *tsousal177@gmail.com*  
+- Never commit Oracle credentials; configure them through environment variables.
+- The included CNPJ-like values are synthetic placeholders, not real customer data.
+- Add authentication, authorization, CSRF protection, rate limits, input schemas, and automated tests before any production use.
+- Restrict CORS to known origins in a deployed environment.
+- Replace the fixed 5% procedure with a domain-valid process before real use.
 
- Se este projeto te ajudou, não esqueça de deixar uma **estrela no GitHub!**
+## Author
+
+Tiago Sousa Leite
+
+Developed as an academic project for learning Python, APIs, and relational databases.
+
+## Licensing
+
+No software license has been granted for this repository.
